@@ -74,6 +74,7 @@ async def date_bindings_action(message: Message, state: FSMContext):
     await new_note.sync()
     await state.clear()
 
+    await message.answer("Создаем заметку...", reply_markup=ReplyKeyboardRemove())
     keyboard = InlineKeyboardBuilder()
     logging.info(new_note.id)
     keyboard.row(
