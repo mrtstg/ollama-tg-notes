@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "ollama-tg-notes"
+version = "0.1.0"
+description = ""
+authors = ["mrtstg <mrtstgdev@gmail.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiogram = "^3.15.0"
+ollama = "^0.4.4"
+beanie = "^1.28.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
