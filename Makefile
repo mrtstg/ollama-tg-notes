@@ -2,6 +2,9 @@ COMPOSE_COMMAND=docker compose --project-name ollama-notes --env-file docker.env
 
 all: run
 
+build-image: deployment/Dockerfile
+	docker build -t notes-bot -f deployment/Dockerfile .
+
 run: src/main.py
 	poetry run python -m src.main
 
