@@ -13,6 +13,7 @@ services:
   bot:
     image: notes-bot
     container_name: notes-bot
+    stop_grace_period: 1s
     profiles: ['prod']
     restart: unless-stopped
     env_file:
