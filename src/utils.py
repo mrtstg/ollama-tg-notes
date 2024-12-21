@@ -1,24 +1,65 @@
+from aiogram import types
+from aiogram.types.message import Message
 from .models import Note
 import datetime
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+import logging
 
 
-async def get_week_notes() -> list[Note]:
-    return await get_notes_from_range(get_date_range_from_today(86400 * 7))
+def build_notes_keyboard(
+    base_payload: str, notes: list[Note], page: int = 1, page_size: int = 5
+) -> InlineKeyboardBuilder:
+    keyboard = InlineKeyboardBuilder()
+    page_notes = notes[(page - 1) * page_size : page * page_size]
+    for note in page_notes:
+        keyboard.row(
+            types.InlineKeyboardButton(
+                text=process_note_title(note.note),
+                callback_data="note_" + str(note.id) + "_" + base_payload,
+            )
+        )
+    last_row = []
+    if page != 1:
+        last_row.append(
+            types.InlineKeyboardButton(
+                text="<", callback_data=base_payload + "_page" + str(page - 1)
+            )
+        )
+    if notes[page * page_size :]:
+        last_row.append(
+            types.InlineKeyboardButton(
+                text=">", callback_data=base_payload + "_page" + str(page + 1)
+            )
+        )
+    if last_row:
+        keyboard.row(*last_row)
+
+    return keyboard
 
 
-async def get_today_notes() -> list[Note]:
-    return await get_notes_from_range(get_date_range_from_today(86400))
+async def get_week_notes(user_id: int) -> list[Note]:
+    return await get_notes_from_range(user_id, get_date_range_from_today(86400 * 7 - 1))
 
 
-async def get_tomorrow_notes() -> list[Note]:
-    return await get_notes_from_range(get_date_range_from_today(86400, 86400))
+async def get_today_notes(user_id: int) -> list[Note]:
+    return await get_notes_from_range(user_id, get_date_range_from_today(86400 - 1))
+
+
+async def get_tomorrow_notes(user_id: int) -> list[Note]:
+    return await get_notes_from_range(
+        user_id, get_date_range_from_today(86400, 86400 - 1)
+    )
 
 
 async def get_notes_from_range(
-    date_range: tuple[datetime.datetime, datetime.datetime]
+    user_id: int, date_range: tuple[datetime.datetime, datetime.datetime]
 ) -> list[Note]:
     (start, end) = date_range
-    return await Note.find(Note.date >= start, Note.date <= end).to_list()
+    return (
+        await Note.find(Note.date >= start, Note.date <= end, Note.uid == user_id)
+        .sort(+Note.date)  # type: ignore
+        .to_list()
+    )
 
 
 def get_date_range_from_today(
@@ -49,7 +90,7 @@ def generate_notes_payload(notes: list[Note], include_finished: bool = False) ->
     all_dates_str_set: list[str] = []
     for date in reversed(all_dates):
         s = date.strftime("%d.%m.%Y")
-        if s in all_dates:
+        if s in all_dates_str_set:
             continue
         all_dates_str_set.append(s)
     notes_dict: dict[str, list[Note]] = {d: [] for d in all_dates_str_set}
