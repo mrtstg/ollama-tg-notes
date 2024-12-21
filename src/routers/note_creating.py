@@ -10,6 +10,7 @@ from aiogram.types import (
     ReplyKeyboardRemove,
     ReplyKeyboardMarkup,
 )
+from typing import Match
 from ..acl import TG_ACL
 from ..filters import ACLFilter
 from ..date_mapper import *
@@ -35,16 +36,7 @@ class NoteCreatingStage(StatesGroup):
     TITLE, DATE = [State() for _ in range(2)]
 
 
-@router.message(ACLFilter(TG_ACL), F.text.regexp("^/note$"))
-async def create_note_start(message: Message, state: FSMContext):
-    await message.answer("Введите заголовок заметки: ")
-    await state.set_state(NoteCreatingStage.TITLE)
-
-
-@router.message(NoteCreatingStage.TITLE, ACLFilter(TG_ACL), F.text.len() > 0)
-async def create_note_title(message: Message, state: FSMContext):
-    await state.set_state(NoteCreatingStage.DATE)
-    await state.update_data(title=message.text)
+async def reply_dates(message: Message):
     buttons = [[]]
     for b in available_date_mappers_keys:
         if len(buttons[-1]) >= 2:
@@ -56,6 +48,29 @@ async def create_note_title(message: Message, state: FSMContext):
         "Укажите дату или выберите из списка ниже: ",
         reply_markup=ReplyKeyboardMarkup(keyboard=buttons, one_time_keyboard=True),
     )
+
+
+@router.message(ACLFilter(TG_ACL), F.text.regexp("^/note (.*)$").as_("match"))
+async def create_note_with_title(
+    message: Message, match: Match[str], state: FSMContext
+):
+    title = match.group(1)
+    await state.set_state(NoteCreatingStage.DATE)
+    await state.update_data(title=title)
+    await reply_dates(message)
+
+
+@router.message(ACLFilter(TG_ACL), F.text.regexp("^/note$"))
+async def create_note_start(message: Message, state: FSMContext):
+    await message.answer("Введите заголовок заметки: ")
+    await state.set_state(NoteCreatingStage.TITLE)
+
+
+@router.message(NoteCreatingStage.TITLE, ACLFilter(TG_ACL), F.text.len() > 0)
+async def create_note_title(message: Message, state: FSMContext):
+    await state.set_state(NoteCreatingStage.DATE)
+    await state.update_data(title=message.text)
+    await reply_dates(message)
 
 
 @router.message(
