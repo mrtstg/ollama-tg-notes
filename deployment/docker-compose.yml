@@ -9,7 +9,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
     volumes:
-      - ./mongodata:/data/db
+      - ../mongodata:/data/db
   bot:
     image: notes-bot
     container_name: notes-bot
