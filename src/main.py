@@ -15,6 +15,7 @@ from .models import *
 from .routers.note_listing import router as listing_router
 from .routers.note_creating import router as creating_router
 from .routers.note_deleting import router as deleting_router
+from .routers.note_managing import router as managing_router
 
 logging.basicConfig(
     format="%(asctime)s - [%(levelname)s] - %(module)s:%(lineno)d - %(message)s",
@@ -53,7 +54,9 @@ async def main():
     )
     await init_beanie(client.db, document_models=[Note])
 
-    dp.include_routers(main_router, listing_router, deleting_router, creating_router)
+    dp.include_routers(
+        main_router, listing_router, deleting_router, creating_router, managing_router
+    )
 
     logging.info("Бот начал работу!")
     while True:
