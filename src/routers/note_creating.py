@@ -50,6 +50,12 @@ async def reply_dates(message: Message):
     )
 
 
+@router.message(ACLFilter(TG_ACL), Command("cancel"))
+async def cancel_creation(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Создание заметки отменено!")
+
+
 @router.message(ACLFilter(TG_ACL), F.text.regexp("^/note (.*)$").as_("match"))
 async def create_note_with_title(
     message: Message, match: Match[str], state: FSMContext
