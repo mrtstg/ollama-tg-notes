@@ -8,26 +8,20 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from ..acl import TG_ACL
 from ..filters import ACLFilter
 import datetime
-from ..utils import generate_notes_payload
+from ..utils import *
 
 router = Router(name=__name__)
 
 
-@router.message(Command("weekly"))
+@router.message(Command("week"))
 async def list_week_notes(message: Message):
-    now = datetime.datetime.now()
-    start = datetime.datetime(now.year, now.month, now.day)
-    end = datetime.datetime.fromtimestamp(start.timestamp() + 86400 * 7)
-    notes = await Note.find(Note.date >= start, Note.date <= end).to_list()
+    notes = await get_week_notes()
     await message.answer(generate_notes_payload(notes))
 
 
 @router.message(Command("today"))
 async def list_today_notes(message: Message):
-    now = datetime.datetime.now()
-    start = datetime.datetime(now.year, now.month, now.day)
-    end = datetime.datetime.fromtimestamp(start.timestamp() + 86400)
-    notes = await Note.find(Note.date >= start, Note.date <= end).to_list()
+    notes = await get_today_notes()
     text = "Заметки на сегодня:\n"
     for note in notes:
         text += " - " + note.note + "\n"
@@ -36,12 +30,7 @@ async def list_today_notes(message: Message):
 
 @router.message(Command("tomorrow"))
 async def list_tomorrow_notes(message: Message):
-    now = datetime.datetime.now()
-    start = datetime.datetime.fromtimestamp(
-        datetime.datetime(now.year, now.month, now.day).timestamp() + 86400
-    )
-    end = datetime.datetime.fromtimestamp(start.timestamp() + 86400)
-    notes = await Note.find(Note.date >= start, Note.date <= end).to_list()
+    notes = await get_tomorrow_notes()
     text = "Заметки на завтра:\n"
     for note in notes:
         text += " - " + note.note + "\n"
