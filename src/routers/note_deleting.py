@@ -35,3 +35,5 @@ async def delete_note_callback(query: CallbackQuery, match: Match[str]):
 
     await note.delete()
     await query.answer("Заметка удалена!")
+    if query.message is not None and isinstance(query.message, Message):
+        await query.message.delete()
