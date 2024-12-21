@@ -31,7 +31,7 @@ async def list_week_notes_buttons(query: CallbackQuery, match: Match[str]):
     page = int(match.group(2))
     notes = await filters_mapping[filter_group](query.from_user.id)
     payload = {
-        "text": generate_notes_payload(notes),
+        "text": generate_notes_payload(notes, True),
         "reply_markup": build_notes_keyboard("week", notes, page=page).as_markup(),
     }
     try:
@@ -49,7 +49,7 @@ async def list_week_notes(message: Message):
     assert message.from_user is not None
     notes = await get_week_notes(message.from_user.id)
     await message.answer(
-        generate_notes_payload(notes),
+        generate_notes_payload(notes, True),
         reply_markup=build_notes_keyboard("week", notes).as_markup(),
     )
 
@@ -60,7 +60,7 @@ async def list_today_notes(message: Message):
     notes = await get_today_notes(message.from_user.id)
     text = "Заметки на сегодня:\n"
     for note in notes:
-        text += " - " + note.note + "\n"
+        text += (" - " if not note.finished else "✅") + note.note + "\n"
     await message.answer(
         text, reply_markup=build_notes_keyboard("today", notes).as_markup()
     )
@@ -72,7 +72,7 @@ async def list_tomorrow_notes(message: Message):
     notes = await get_tomorrow_notes(message.from_user.id)
     text = "Заметки на завтра:\n"
     for note in notes:
-        text += " - " + note.note + "\n"
+        text += (" - " if not note.finished else "✅") + note.note + "\n"
     await message.answer(
         text, reply_markup=build_notes_keyboard("tomorrow", notes).as_markup()
     )

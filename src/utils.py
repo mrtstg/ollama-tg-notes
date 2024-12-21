@@ -101,7 +101,7 @@ def generate_notes_payload(notes: list[Note], include_finished: bool = False) ->
         text += "Задачи на " + date + ":\n"
         for note in notes_dict[date]:
             if note.finished and include_finished:
-                text += " - " + note.note + " [ЗАКОНЧЕНА]\n"
+                text += "✅" + note.note + "\n"
             elif not note.finished:
                 text += " - " + note.note + "\n"
     return text
