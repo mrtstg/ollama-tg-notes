@@ -104,4 +104,4 @@ def generate_notes_payload(notes: list[Note], include_finished: bool = False) ->
                 text += "✅" + note.note + "\n"
             elif not note.finished:
                 text += " - " + note.note + "\n"
-    return text
+    return text if len(text) > 0 else "Задач нет."
