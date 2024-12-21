@@ -21,7 +21,7 @@ from typing import Match
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data.regexp("^delete_(.*)$").as_("match"))
+@router.callback_query(ACLFilter(TG_ACL), F.data.regexp("^delete_(.*)$").as_("match"))
 async def delete_note_callback(query: CallbackQuery, match: Match[str]):
     note_id = match.group(1)
     note = await Note.find_one(Note.id == PydanticObjectId(note_id))
