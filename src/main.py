@@ -5,6 +5,8 @@ import logging
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.types import Message
 import logging
+from .utils import *
+from .utils import generate_notes_payload
 from .acl import TG_ACL
 from .filters import ACLFilter
 import sys
@@ -37,8 +39,28 @@ main_router = Router(name=__name__)
 
 @main_router.message(ACLFilter(TG_ACL), F.text.regexp(r"^/ask (.*)$").as_("match"))
 async def any_message_handler(message: Message, match: Match[str]):
-    data = {"role": "user", "content": match.group(1)}
-    resp = await ollama.chat(model=OLLAMA_MODEL, messages=[data])
+    assert message.from_user is not None
+    notes = await get_week_notes(message.from_user.id)
+    payload = generate_notes_payload(notes)
+    now = datetime.datetime.now().strftime("%d.%m.%Y")
+    data = [
+        {
+            "role": "system",
+            "content": "Ты - персональный ассистент. Твоя задача - ответить максимально корректно по пользовательскому запросу. Используй контекст в виде задач на дни. Сегодня - "
+            + now,
+        },
+        {
+            "role": "user",
+            "content": match.group(1) + "\n\n" + payload,
+        },
+    ]
+    logging.debug(data)
+    await message.answer("Запрос отправлен!")
+    try:
+        resp = await ollama.chat(model=OLLAMA_MODEL, messages=data)
+    except Exception as e:
+        await message.answer("Ошибка: " + str(e))
+        return
     if resp.message.content is None:
         await message.answer("No reply from model!")
         return
