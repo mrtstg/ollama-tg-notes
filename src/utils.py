@@ -78,7 +78,7 @@ def get_date_range_from_today(
 # crops text for callback button if its longer that 50 symbols
 def process_note_title(title: str) -> str:
     if len(title) > 50:
-        return title[:0] + "..."
+        return title[:50] + "..."
     return title
 
 
