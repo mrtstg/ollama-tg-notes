@@ -5,6 +5,7 @@ description = ""
 authors = ["mrtstg <mrtstgdev@gmail.com>"]
 readme = "README.md"
 packages = [{include = "src"}]
+license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
 python = "^3.12"
