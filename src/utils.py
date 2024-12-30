@@ -51,10 +51,21 @@ async def get_tomorrow_notes(user_id: int) -> list[Note]:
     )
 
 
+async def get_yesterday_notes(user_id: int) -> list[Note]:
+    return await get_notes_from_range(user_id, get_date_range_from_today(86400, -86401))
+
+
+async def get_prev_week_notes(user_id: int) -> list[Note]:
+    return await get_notes_from_range(
+        user_id, get_date_range_from_today(86400 * 7, -86400 * 7 - 1)
+    )
+
+
 async def get_notes_from_range(
     user_id: int, date_range: tuple[datetime.datetime, datetime.datetime]
 ) -> list[Note]:
     (start, end) = date_range
+    print(start, end)
     return (
         await Note.find(Note.date >= start, Note.date <= end, Note.uid == user_id)
         .sort(+Note.date)  # type: ignore
