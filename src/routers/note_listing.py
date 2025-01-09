@@ -34,7 +34,9 @@ async def list_week_notes_buttons(query: CallbackQuery, match: Match[str]):
     notes = await filters_mapping[filter_group](query.from_user.id)
     payload = {
         "text": generate_notes_payload(notes, True),
-        "reply_markup": build_notes_keyboard("week", notes, page=page).as_markup(),
+        "reply_markup": build_notes_keyboard(
+            filter_group, notes, page=page
+        ).as_markup(),
     }
     try:
         assert query.message is not None
