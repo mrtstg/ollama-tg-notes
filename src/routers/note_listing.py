@@ -62,7 +62,7 @@ async def list_prev_week_notes(message: Message):
     notes = await get_prev_week_notes(message.from_user.id)
     await message.answer(
         generate_notes_payload(notes, True),
-        reply_markup=build_notes_keyboard("week", notes).as_markup(),
+        reply_markup=build_notes_keyboard("pweek", notes).as_markup(),
     )
 
 
