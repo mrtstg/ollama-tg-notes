@@ -65,7 +65,6 @@ async def get_notes_from_range(
     user_id: int, date_range: tuple[datetime.datetime, datetime.datetime]
 ) -> list[Note]:
     (start, end) = date_range
-    print(start, end)
     return (
         await Note.find(Note.date >= start, Note.date <= end, Note.uid == user_id)
         .sort(+Note.date)  # type: ignore
